@@ -1,63 +1,78 @@
-const body = document.body
-
-const btnTheme = document.querySelector('.fa-moon')
-const btnHamburger = document.querySelector('.fa-bars')
-
-const addThemeClass = (bodyClass, btnClass) => {
-    body.classList.add(bodyClass)
-    btnTheme.classList.add(btnClass)
+function getHistory(){
+	return document.getElementById("history-value").innerText;
 }
-
-const getBodyTheme = localStorage.getItem('portfolio-theme')
-const getBtnTheme = localStorage.getItem('portfolio-btn-theme')
-
-addThemeClass(getBodyTheme, getBtnTheme)
-
-const isDark = () => body.classList.contains('dark')
-
-const setTheme = (bodyClass, btnClass) => {
-
-    body.classList.remove(localStorage.getItem('portfolio-theme'))
-    btnTheme.classList.remove(localStorage.getItem('portfolio-btn-theme'))
-
-    addThemeClass(bodyClass, btnClass)
-
-    localStorage.setItem('portfolio-theme', bodyClass)
-    localStorage.setItem('portfolio-btn-theme', btnClass)
+function printHistory(num){
+	document.getElementById("history-value").innerText=num;
 }
-
-const toggleTheme = () =>
-    isDark() ? setTheme('light', 'fa-moon') : setTheme('dark', 'fa-sun')
-
-btnTheme.addEventListener('click', toggleTheme)
-
-const displayList = () => {
-    const navUl = document.querySelector('.nav__list')
-
-    if (btnHamburger.classList.contains('fa-bars')) {
-        btnHamburger.classList.remove('fa-bars')
-        btnHamburger.classList.add('fa-times')
-        navUl.classList.add('display-nav-list')
-    } else {
-        btnHamburger.classList.remove('fa-times')
-        btnHamburger.classList.add('fa-bars')
-        navUl.classList.remove('display-nav-list')
-    }
+function getOutput(){
+	return document.getElementById("output-value").innerText;
 }
-
-btnHamburger.addEventListener('click', displayList)
-
-const scrollUp = () => {
-    const btnScrollTop = document.querySelector('.scroll-top')
-
-    if (
-        body.scrollTop > 500 ||
-        document.documentElement.scrollTop > 500
-    ) {
-        btnScrollTop.style.display = 'block'
-    } else {
-        btnScrollTop.style.display = 'none'
-    }
+function printOutput(num){
+	if(num==""){
+		document.getElementById("output-value").innerText=num;
+	}
+	else{
+		document.getElementById("output-value").innerText=getFormattedNumber(num);
+	}	
 }
-
-document.addEventListener('scroll', scrollUp)
+function getFormattedNumber(num){
+	if(num=="-"){
+		return "";
+	}
+	var n = Number(num);
+	var value = n.toLocaleString("en");
+	return value;
+}
+function reverseNumberFormat(num){
+	return Number(num.replace(/,/g,''));
+}
+var operator = document.getElementsByClassName("operator");
+for(var i =0;i<operator.length;i++){
+	operator[i].addEventListener('click',function(){
+		if(this.id=="clear"){
+			printHistory("");
+			printOutput("");
+		}
+		else if(this.id=="backspace"){
+			var output=reverseNumberFormat(getOutput()).toString();
+			if(output){//if output has a value
+				output= output.substr(0,output.length-1);
+				printOutput(output);
+			}
+		}
+		else{
+			var output=getOutput();
+			var history=getHistory();
+			if(output==""&&history!=""){
+				if(isNaN(history[history.length-1])){
+					history= history.substr(0,history.length-1);
+				}
+			}
+			if(output!="" || history!=""){
+				output= output==""?output:reverseNumberFormat(output);
+				history=history+output;
+				if(this.id=="="){
+					var result=eval(history);
+					printOutput(result);
+					printHistory("");
+				}
+				else{
+					history=history+this.id;
+					printHistory(history);
+					printOutput("");
+				}
+			}
+		}
+		
+	});
+}
+var number = document.getElementsByClassName("number");
+for(var i =0;i<number.length;i++){
+	number[i].addEventListener('click',function(){
+		var output=reverseNumberFormat(getOutput());
+		if(output!=NaN){ //if output is a number
+			output=output+this.id;
+			printOutput(output);
+		}
+	});
+}
